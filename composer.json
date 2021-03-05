@@ -1,0 +1,15 @@
+{
+    "name": "rajeev/framework-from-scratch",
+    "authors": [
+        {
+            "name": "Rajeev van Appeldorn",
+            "email": "rajeevvanappeldorn@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "app\\": "./"
+        }
+    },
+    "require": {}
+}
