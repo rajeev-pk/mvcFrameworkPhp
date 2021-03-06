@@ -24,6 +24,11 @@ class Router
         $this->routes["get"][$url] = $callback;
     }
 
+    public function post($url, $callback)
+    {
+        $this->routes["post"][$url] = $callback;
+    }
+
     // get curent url and execute function by given url
     public function resolve()
     {
@@ -33,19 +38,29 @@ class Router
 
         if ($callback === false) {
             $this->response->setStatusCode(404);
-            return '404 page not found';
+            return $this->renderTemplate('_404');
         }
         if(is_string($callback)) {
             return $this->renderTemplate($callback);
         }
-        return call_user_func($callback);
+        if(is_array($callback)) {
+            $callback[0] = new $callback[0]();
+        }
+
+        return call_user_func($callback, $this->request);
     }
 
-    public function renderTemplate($template)
+    public function renderTemplate($template, $params = [])
     {
-        $layoutContent =$this->layoutContent();
-        $templateContent = $this->renderOnlyTemplate($template);
+        $layoutContent = $this->layoutContent();
+        $templateContent = $this->renderOnlyTemplate($template, $params);
         return str_replace(' {{content}}', $templateContent, $layoutContent);
+    }
+
+    public function renderContent($templatContent)
+    {
+        $layoutContent = $this->layoutContent();
+        return str_replace(' {{content}}', $templatContent, $layoutContent);
     }
 
     protected function layoutContent()
@@ -55,8 +70,11 @@ class Router
         return ob_get_clean();
     }
 
-    protected function renderOnlyTemplate($template)
-    {
+    protected function renderOnlyTemplate($template, $params)
+    {   
+        foreach ($params as $key => $value) {
+            $$key  = $value;
+        }
         ob_start();
         include_once Application::$ROOT_DIR."/templates/$template.temp.php";
         return ob_get_clean();
